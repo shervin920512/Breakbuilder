@@ -1,4 +1,23 @@
 import { useState, useEffect } from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
 
 export default function Home() {
   const [selectedDrill, setSelectedDrill] = useState('');
@@ -25,7 +44,7 @@ export default function Home() {
       id: Date.now(),
       date: new Date().toLocaleDateString('fa-IR'),
       drill: selectedDrill,
-      score,
+      score: parseInt(score),
       yourFeedback,
       mahsaFeedback,
     };
@@ -115,6 +134,35 @@ export default function Home() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {history.length > 1 && (
+        <>
+          <h2 style={{ marginTop: 30 }}>نمودار پیشرفت</h2>
+          <Line
+            data={{
+              labels: history.map((h) => h.date).reverse(),
+              datasets: [
+                {
+                  label: 'امتیاز',
+                  data: history.map((h) => h.score).reverse(),
+                  borderColor: 'blue',
+                  backgroundColor: 'lightblue',
+                  tension: 0.3,
+                },
+              ],
+            }}
+            options={{
+              responsive: true,
+              scales: {
+                y: {
+                  suggestedMin: 0,
+                  suggestedMax: 10,
+                },
+              },
+            }}
+          />
+        </>
       )}
     </main>
   );
