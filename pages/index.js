@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [selectedDrill, setSelectedDrill] = useState('');
@@ -6,6 +6,7 @@ export default function Home() {
   const [yourFeedback, setYourFeedback] = useState('');
   const [mahsaFeedback, setMahsaFeedback] = useState('');
   const [saved, setSaved] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const drills = [
     'تمرین Line-Up',
@@ -14,13 +15,29 @@ export default function Home() {
     'تمرین Break Building',
   ];
 
+  useEffect(() => {
+    const stored = localStorage.getItem('breakbuilder');
+    if (stored) setHistory(JSON.parse(stored));
+  }, []);
+
   const handleSave = () => {
-    console.log({
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('fa-IR'),
       drill: selectedDrill,
       score,
       yourFeedback,
       mahsaFeedback,
-    });
+    };
+
+    const updated = [entry, ...history];
+    setHistory(updated);
+    localStorage.setItem('breakbuilder', JSON.stringify(updated));
+
+    setSelectedDrill('');
+    setScore(5);
+    setYourFeedback('');
+    setMahsaFeedback('');
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -70,6 +87,35 @@ export default function Home() {
       </button>
 
       {saved && <p style={{ color: 'green' }}>ذخیره شد!</p>}
+
+      <hr style={{ margin: '30px 0' }} />
+
+      <h2>تاریخچه تمرین‌ها</h2>
+      {history.length === 0 && <p>هنوز چیزی ثبت نشده.</p>}
+      {history.length > 0 && (
+        <table border="1" cellPadding="5" style={{ width: '100%', marginTop: 10 }}>
+          <thead>
+            <tr>
+              <th>تاریخ</th>
+              <th>تمرین</th>
+              <th>امتیاز</th>
+              <th>فیدبک تو</th>
+              <th>فیدبک مهسا</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((item) => (
+              <tr key={item.id}>
+                <td>{item.date}</td>
+                <td>{item.drill}</td>
+                <td>{item.score}</td>
+                <td>{item.yourFeedback}</td>
+                <td>{item.mahsaFeedback}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </main>
   );
 }
